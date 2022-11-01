@@ -1,0 +1,11 @@
+import os,sys
+val=input()
+with open('myfile.txt',"w") as f:
+    f.write(os.system(f"amass enum -d {val} -o domain.txt"))
+
+f = open("domain.txt", "r+")
+for x in f:
+    print(x)
+    l="| grep 'open' | awk -F / '{print $1}'"
+    print(os.system(f"nmap {x} {l}"))
+f.close()
