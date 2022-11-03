@@ -1,7 +1,6 @@
 import os,sys
 val=input()
-with open('myfile.txt',"w") as f:
-    f.write(os.system(f"amass enum -d {val} -o domain.txt"))
+(os.system(f"amass enum -d {val} -o domain.txt"))
 f = open("domain.txt", "r+")
 wf = open("sub_domain.txt","a")
 (os.system(f"nmap -iL domain.txt -oX sub-domain.xml"))
