@@ -1,4 +1,5 @@
 import os,sys
+import xml.etree.cElementTree as ET
 def getSubdomain(domain):
     os.system(f"amass enum -d {domain} -o domain.txt")
     f = open("domain.txt", "r+")
