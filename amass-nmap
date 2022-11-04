@@ -1,39 +1,43 @@
 import os,sys
-val=input()
-(os.system(f"amass enum -d {val} -o domain.txt"))
-f = open("domain.txt", "r+")
-wf = open("sub_domain.txt","a")
-(os.system(f"nmap -iL domain.txt -oX sub-domain.xml"))
+def getSubdomain(domain):
+    os.system(f"amass enum -d {domain} -o domain.txt")
+    f = open("domain.txt", "r+")
+    list=[]
+    for x in f:
+        list.append(x)
+    f.close()
+    return list
+def discoverOpenPortsubdomain(domain):
+    os.system(f" nmap {domain} -oX sub-domain.xml")
+    tree = ET.parse('sub-domain.xml')
+    root = tree.getroot()
+    portList = []
+    for host in root.findall('host'):
+        ports = host.findall('ports')[0].findall('port')
+        for port in ports:
+            portList.append(int(port.get('portid')))
+    return (portList)
+# f = open("domain.txt", "r+")
+# list=[]
+# for x in f:
+#     list.append(x)
+# f.close()
+def discoverOpenPortsubdomains(list=[]):
+    mydict={}
+    for x in list:
+        print(x)
+        mydict[x]=discoverOpenPortsubdomain(x)
+    return mydict
 
-tree = ET.parse('sub-domain.xml')
-root = tree.getroot()
-# d = [
-#         # {'path': 'address', 'el': 'addr'},
-#         {'path': 'hostnames/hostname', 'el': 'name'},
-#         {'path': 'ports/port', 'el': 'portid'}
-# ]
-# for i in root.iter('host'):
-#         for h in d:
-#             e = i.find(h['path'])
-#             if e is not None: print(e.get(h['el']))
+def aquatone():
+    os.system(f"cat domain.txt | aquatone -ports medium ") 
+    return
+def main():
+    val=input()
+    print(discoverOpenPortsubdomains(getSubdomain(val)))
 
-results = []
-port_list = ''
-for host in root.findall('host'):
-    p = host.find('address').get('addr')
-    ports = host.findall('ports')[0].findall('port')
-    for port in ports:
-        port_list += port.get('portid') + ','
-        port_list = port_list.rstrip(',')
-        if port_list:
-            results.append(f" {port_list}")
-        port_list = ''
-kq=[]
-for number in results:
-    a=int(number)
-    kq.insert(len(kq),a)
-print(kq)
-os.system(f"cat sub-domain.xml | aquatone -nmap")
-f.close()
-wf.close()
+
+if __name__ == "__main__":
+    main()
+
 
