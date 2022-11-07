@@ -89,8 +89,9 @@ def config(url):
 def main():
     val=input()
     print(discoverOpenPortsubdomains(getSubdomain(val)))
+    list_url = aquatone()
     for url in list_url :
-        config(aquatone())
+        config(url)
 
 
 if __name__ == "__main__":
