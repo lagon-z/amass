@@ -41,7 +41,12 @@ def discoverOpenPortsubdomains(list=[]):
 
 def aquatone():
     os.system(f"cat domain.txt | aquatone -ports medium ") 
-    return
+    f = open("list_url.txt", "r+")
+    list_url=[]
+    for x in f:
+        list_url.append(x)
+    f.close()
+    return list_url
 def addtask(url=''):
     data = {"address":url,"description":url,"criticality":"10"}
     try:
@@ -84,6 +89,8 @@ def config(url):
 def main():
     val=input()
     print(discoverOpenPortsubdomains(getSubdomain(val)))
+    for url in list_url :
+        config(aquatone())
 
 
 if __name__ == "__main__":
