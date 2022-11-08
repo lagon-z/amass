@@ -43,7 +43,7 @@ class Amass:
         for port in ports:
             if(port not in filteredPortList):
                 filteredPortList.append(port)
-        return filteredPortList
+        return ",".join(filteredPortList)
     
 class Aquatone:
     def init(self) -> None:
