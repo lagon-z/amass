@@ -28,7 +28,7 @@ class Amass:
             ports = host.findall('ports')[0].findall('port')
             for port in ports:
                 portList.append(port.get('portid'))
-        return (portList)
+        return portList
 
     def discoverOpenPortsubdomains(self, listSubdomain=[]):
         subdomainPortsDict={}
@@ -36,6 +36,14 @@ class Amass:
             print(subdomain)
             subdomainPortsDict[subdomain]=self.discoverOpenPortsubdomain(subdomain)
         return subdomainPortsDict
+    
+    def generalPort(self, subdomainPortsDict={}):
+        filteredPortList = []
+        for ports in mydict.values():
+        for port in ports:
+            if(port not in filteredPortList):
+                filteredPortList.append(port)
+        return filteredPortList
     
 class Aquatone:
     def init(self) -> None:
