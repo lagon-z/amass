@@ -49,8 +49,8 @@ class Aquatone:
     def init(self) -> None:
         pass
     
-    def scan(self):
-        os.system(f"cat domain.txt | aquatone -ports medium ") 
+    def scan(self, filteredPortList):
+        os.system(f"cat domain.txt | aquatone -ports {filteredPortList} ") 
         fileUrl = open("list_url.txt", "r+")
         list_url=[]
         for url in fileUrl:
