@@ -57,3 +57,46 @@ class Aquatone:
             list_url.append(url)
         fileUrl.close()
         return list_url
+class Acunetix:
+    def __init__(self): -> None:
+        pass
+        
+    def addtask(self, url=''):
+        data = {"address":url,"description":url,"criticality":"10"}
+        try:
+            response = requests.post(tarurl+"/api/v1/targets",data=json.dumps(data),headers=headers,timeout=30,verify=False)
+            result = json.loads(response.content)
+            return result['target_id']
+        except Exception as e:
+            print(str(e))
+            return
+        def startscan(self, target_id):
+            data = {"target_id":target_id,"profile_id":"11111111-1111-1111-1111-111111111111","schedule": {"disable": False,"start_date":None,"time_sensitive": False}}
+        try:
+            response = requests.post(tarurl+"/api/v1/scans",data=json.dumps(data),headers=headers,timeout=30,verify=False)
+            result = json.loads(response.content)
+            return result['target_id']
+        except Exception as e:
+            print(str(e))
+            return   
+    def checkProcess(self) :
+        for scan_id in list_processing : 
+            try:
+                response = requests.get(tarurl+"/api/v1/scans/"+str(scan_id),headers=headers,timeout=30,verify=False)
+                result = json.loads(response.content)
+                status = result['current_session']['status']
+                if status == "completed":
+                    list_processing.remove(scan_id)
+            except Exception as e:
+                print(str(e))
+                return
+        return len(list_processing)
+    def config(self, url):
+        process = checkProcess()
+        while True:
+            if process >=3 :
+                time.sleep(300)
+                process = checkProcess()
+            else : 
+                list_processing.append(startscan(addtask(url)))
+                break
