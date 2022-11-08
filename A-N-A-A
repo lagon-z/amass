@@ -1,0 +1,51 @@
+import os
+import sys
+import xml.etree.cElementTree as ET
+import json
+import requests
+import time
+# import requests.packages.urllib3
+
+class Amass:
+    def init(self, domain):
+        self.domain = domain
+    
+    def getSubdomain(self):
+        os.system(f"amass enum -d {self.domain} -o domain.txt")
+        fileDomain = open("domain.txt", "r+")
+        listSubdomain = []
+        for subdomain in fileDomain:
+            listSubdomain.append(subdomain)
+        fileDomain.close()
+        return listSubdomain
+    
+    def discoverOpenPortsubdomain(self, subdomain):
+        os.system(f" nmap {subdomain} -oX sub-domain.xml")
+        tree = ET.parse('sub-domain.xml')
+        root = tree.getroot()
+        portList = []
+        for host in root.findall('host'):
+            ports = host.findall('ports')[0].findall('port')
+            for port in ports:
+                portList.append(port.get('portid'))
+        return (portList)
+
+    def discoverOpenPortsubdomains(self, listSubdomain=[]):
+        subdomainPortsDict={}
+        for subdomain in list:
+            print(subdomain)
+            subdomainPortsDict[subdomain]=self.discoverOpenPortsubdomain(subdomain)
+        return subdomainPortsDict
+    
+class Aquatone:
+    def init(self) -> None:
+        pass
+    
+    def scan(self):
+        os.system(f"cat domain.txt | aquatone -ports medium ") 
+        fileUrl = open("list_url.txt", "r+")
+        list_url=[]
+        for url in fileUrl:
+            list_url.append(url)
+        fileUrl.close()
+        return list_url
