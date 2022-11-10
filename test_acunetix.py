@@ -18,6 +18,7 @@ def startscan(tarurl,headers,target_id):
     except Exception as e:
         print(str(e))
         return   
+list_url = [] #urrl lay tu aquatone
 class myThread(threading.Thread):
 
     def __init__(self, threadID, ip, apikey, output):
@@ -30,6 +31,7 @@ class myThread(threading.Thread):
         tarurl = "https://"+self.ip+":3443/"
         headers = {"X-Auth":self.apikey,"content-type": "application/json"}
         threadLock.acquire()
+            #can them lay urrl trong list
         startscan(tarurl,headers,addtask(tarurl,headers,url))
         # Giai phong lock cho thread ke tiep
         threadLock.release()
