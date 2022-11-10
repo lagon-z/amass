@@ -1,43 +1,73 @@
-import math
 import threading
-def addtask(tarurl,headers,url=''):
-    data = {"address":url,"description":url,"criticality":"10"}
-    try:
-        response = requests.post(tarurl+"/api/v1/targets",data=json.dumps(data),headers=headers,timeout=30,verify=False)
-        result = json.loads(response.content)
-        return result['target_id']
-    except Exception as e:
-        print(str(e))
-        return
-def startscan(tarurl,headers,target_id):
-    data = {"target_id":target_id,"profile_id":"11111111-1111-1111-1111-111111111111","schedule": {"disable": False,"start_date":None,"time_sensitive": False}}
-    try:
-        response = requests.post(tarurl+"/api/v1/scans",data=json.dumps(data),headers=headers,timeout=30,verify=False)
-        result = json.loads(response.content)
-        return result['target_id']
-    except Exception as e:
-        print(str(e))
-        return   
-list_url = [] #urrl lay tu aquatone
+from queue import Queue
+import json
+import requests
+import requests.packages.urllib3
+list_url = Queue()
+list_url.put('http://fbox-fw.fpt.vn/')
+list_url.put('http://fti.fpt.vn/')
+list_url.put('http://popmail.fpt.vn:8080/')
+list_url.put('https://qr.fpt.vn/')
+list_url.put('http://isp-relay.fpt.vn/')
+list_url.put('http://fbox-api.fpt.vn/')
+list_url.put('http://api-insidev3-paytv.fpt.vn/')
+list_url.put('https://notification-dev.scc.fpt.vn/')
+list_url.put('http://uat-tstv.fbox.fpt.vn/')
+list_url.put('https://hr.fpt.vn/')
+list_url.put('https://mobisaleguide.fpt.vn/')
+list_url.put('https://survey-paytv.fpt.vn/')
+list_url.put('https://api-cms.fbox.fpt.vn/')
+list_url.put('http://staging-payment.fbox.fpt.vn/')
 class myThread(threading.Thread):
 
-    def __init__(self, threadID, ip, apikey, output):
+    def __init__(self, threadID, ip, apikey):
         threading.Thread.__init__(self)
         self.threadID = threadID	
-        self.ip = ip	
-        self.apikey = apikey	
-        self.output = output	
+        self.tarurl = "https://"+ip+":3443/"
+        self.headers = {"X-Auth":apikey,"content-type": "application/json"}	
+        self.url = ''
+        self.list_processing = []
     def run(self):
-        tarurl = "https://"+self.ip+":3443/"
-        headers = {"X-Auth":self.apikey,"content-type": "application/json"}
-        threadLock.acquire()
-            #can them lay urrl trong list
-        startscan(tarurl,headers,addtask(tarurl,headers,url))
-        # Giai phong lock cho thread ke tiep
-        threadLock.release()
+        while( not list_url.full() ):
+            process = checkProcess()
+            if process >=3 :
+                time.sleep(300)
+            else : 
+                self.url = list_url.get()
+                self.list_processing.append(startscan(addtask()))
+    def addtask(self):
+        data = {"address":self.url,"description":self.url,"criticality":"10"}
+        try:
+            response = requests.post(self.tarurl+"/api/v1/targets",data=json.dumps(data),headers=self.headers,timeout=30,verify=False)
+            result = json.loads(response.content)
+            return result['target_id']
+        except Exception as e:
+            print(str(e))
+            return
+    def startscan(self,target_id):
+        data = {"target_id":target_id,"profile_id":"11111111-1111-1111-1111-111111111111","schedule": {"disable": False,"start_date":None,"time_sensitive": False}}
+        try:
+            response = requests.post(self.tarurl+"/api/v1/scans",data=json.dumps(data),headers=self.headers,timeout=30,verify=False)
+            result = json.loads(response.content)
+            return result['target_id']
+        except Exception as e:
+            print(str(e))
+            return  
+    def checkProcess(self) :
+        for scan_id in self.list_processing : 
+            try:
+                response = requests.get(self.tarurl+"/api/v1/scans/"+str(scan_id),headers=self.headers,timeout=30,verify=False)
+                result = json.loads(response.content)
+                status = result['current_session']['status']
+                if status == "completed":
+                    self.list_processing.remove(scan_id)
+            except Exception as e:
+                print(str(e))
+                return
+        return len(self.list_processing)
 threads = []
-thread1 = myThread(1, "192.168.32.222","1986ad8c0a5b3df4d7028d5f3c06e936c0d5fcab7ab93418d84681370004db207",#output)
-thread2 = myThread(2, "192.168.32.220","1986ad8c0a5b3df4d7028d5f3c06e936c0d5fcab7ab93418d84681370004db207",#output)
+thread1 = myThread(1, "192.168.32.222","1986ad8c0a5b3df4d7028d5f3c06e936c0d5fcab7ab93418d84681370004db207")
+thread2 = myThread(2, "192.168.32.220","1986ad8c0a5b3df4d7028d5f3c06e936c0d5fcab7ab93418d84681370004db207")
 thread1.start()
 thread2.start()# Them cac thread vao list
 threads.append(thread1)
