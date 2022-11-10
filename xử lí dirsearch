@@ -2,8 +2,8 @@
 # tim các địa chỉ có login
 # đưa đưa ra output là file json
 # lấy được các url trong file json là các url login
+# ở dây e sửa đôi file report của plain_text_report.py 
 # tạo thanh 1 list cac url login để đưa vào acunetix
-import json
 import os,sys
 import subprocess
 list_url=[]
@@ -11,12 +11,12 @@ f = open("aquatone_urls.txt", "r+")
 for x in f:
     list_url.append(x)
 f.close()
-
+list=[]
 for x in list_url:
     print(x)
-list_url.append(os.system(f"python3 /home/longlagon/dirsearch/dirsearch.py -e php, html, js -u http://testphp.vulnweb.com/ --prefixes login  --format html -o {'4'}.json"))
-print(list_url)
-
-with open("/home/longlagon/4.json", "r") as fin:
-    data = json.loads(fin.read())
-print(data) # lỗi ở file json để lay được url 
+    (os.system(f"python3 /home/longlagon/dirsearch/dirsearch.py -e php, html, js -u {x} --prefixes login  --format plain -o {'2'}.txt"))
+    f = open("2.txt", "r+")
+    for x in f:
+        list.append(x)
+    f.close()
+print(list)
