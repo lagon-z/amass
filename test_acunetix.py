@@ -3,6 +3,7 @@ from queue import Queue
 import json
 import requests
 import requests.packages.urllib3
+import time
 list_url = Queue()
 list_url.put('http://fbox-fw.fpt.vn/')
 list_url.put('http://fti.fpt.vn/')
@@ -29,12 +30,12 @@ class myThread(threading.Thread):
         self.list_processing = []
     def run(self):
         while( not list_url.full() ):
-            process = checkProcess()
+            process = self.checkProcess()
             if process >=3 :
                 time.sleep(300)
             else : 
                 self.url = list_url.get()
-                self.list_processing.append(startscan(addtask()))
+                self.list_processing.append(self.startscan(self.addtask()))
     def addtask(self):
         data = {"address":self.url,"description":self.url,"criticality":"10"}
         try:
@@ -66,11 +67,8 @@ class myThread(threading.Thread):
                 return
         return len(self.list_processing)
 threads = []
-thread1 = myThread(1, "192.168.32.222","1986ad8c0a5b3df4d7028d5f3c06e936c0d5fcab7ab93418d84681370004db207")
-thread2 = myThread(2, "192.168.32.220","1986ad8c0a5b3df4d7028d5f3c06e936c0d5fcab7ab93418d84681370004db207")
+thread1 = myThread(1, "192.168.233.130","1986ad8c0a5b3df4d7028d5f3c06e936c0d5fcab7ab93418d84681370004db207")
 thread1.start()
-thread2.start()# Them cac thread vao list
 threads.append(thread1)
-threads.append(thread2)# Doi cho tat ca thread ket thuc
 for t in threads:
     t.join()
