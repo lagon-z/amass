@@ -4,99 +4,99 @@ import xml.etree.cElementTree as ET
 import json
 import requests
 import time
-# import requests.packages.urllib3
+import threading
 
 class Amass:
-    def init(self, domain):
-        self.domain = domain
     
+    def __init__(self, domain):
+        self.domain = domain
+
+
     def getSubdomain(self):
-        os.system(f"amass enum -d {self.domain} -o domain.txt")
-        fileDomain = open("domain.txt", "r+")
+        os.system(f"amass enum -d {self.domain} -o subdomain.txt")
+        fileDomain = open("subdomain.txt", "r+")
         listSubdomain = []
         for subdomain in fileDomain:
             listSubdomain.append(subdomain)
         fileDomain.close()
         return listSubdomain
+        
+        
+    # def listFileSubdomain(self):
+    #     # setup a queue for subdomain list
+    #     # global queueSubdomain 
+    #     fileSubdomain = open("subdomain.txt", "r+")
+
+    #     for subdomain in fileSubdomain:
+    #         if subdomain not in queueSubdomain:
+    #             queueSubdomain.append(subdomain)
     
-    def discoverOpenPortsubdomain(self, subdomain):
-        os.system(f" nmap {subdomain} -oX sub-domain.xml")
-        tree = ET.parse('sub-domain.xml')
+
+    def nmapOpenPortSubdomain(self, subdomain):
+        os.system(f" nmap {subdomain} -Pn -oX subdomain.xml")
+        tree = ET.parse('subdomain.xml')
         root = tree.getroot()
         portList = []
+
         for host in root.findall('host'):
             ports = host.findall('ports')[0].findall('port')
             for port in ports:
                 portList.append(port.get('portid'))
+            time.sleep(1)
         return portList
-
-    def discoverOpenPortsubdomains(self, listSubdomain=[]):
-        subdomainPortsDict={}
-        for subdomain in list:
-            print(subdomain)
-            subdomainPortsDict[subdomain]=self.discoverOpenPortsubdomain(subdomain)
-        return subdomainPortsDict
-    
-    def generalPort(self, subdomainPortsDict={}):
-        filteredPortList = []
-        for ports in mydict.values():
-        for port in ports:
-            if(port not in filteredPortList):
-                filteredPortList.append(port)
-        return ",".join(filteredPortList)
-    
-class Aquatone:
-    def init(self) -> None:
-        pass
-    
-    def scan(self, filteredPortList):
-        os.system(f"cat domain.txt | aquatone -ports {filteredPortList} ") 
-        fileUrl = open("list_url.txt", "r+")
-        list_url=[]
-        for url in fileUrl:
-            list_url.append(url)
-        fileUrl.close()
-        return list_url
-class Acunetix:
-    def __init__(self): -> None:
-        pass
         
-    def addtask(self, url=''):
-        data = {"address":url,"description":url,"criticality":"10"}
-        try:
-            response = requests.post(tarurl+"/api/v1/targets",data=json.dumps(data),headers=headers,timeout=30,verify=False)
-            result = json.loads(response.content)
-            return result['target_id']
-        except Exception as e:
-            print(str(e))
-            return
-        def startscan(self, target_id):
-            data = {"target_id":target_id,"profile_id":"11111111-1111-1111-1111-111111111111","schedule": {"disable": False,"start_date":None,"time_sensitive": False}}
-        try:
-            response = requests.post(tarurl+"/api/v1/scans",data=json.dumps(data),headers=headers,timeout=30,verify=False)
-            result = json.loads(response.content)
-            return result['target_id']
-        except Exception as e:
-            print(str(e))
-            return   
-    def checkProcess(self) :
-        for scan_id in list_processing : 
-            try:
-                response = requests.get(tarurl+"/api/v1/scans/"+str(scan_id),headers=headers,timeout=30,verify=False)
-                result = json.loads(response.content)
-                status = result['current_session']['status']
-                if status == "completed":
-                    list_processing.remove(scan_id)
-            except Exception as e:
-                print(str(e))
-                return
-        return len(list_processing)
-    def config(self, url):
-        process = checkProcess()
-        while True:
-            if process >=3 :
-                time.sleep(300)
-                process = checkProcess()
-            else : 
-                list_processing.append(startscan(addtask(url)))
-                break
+
+    def discoverOpenPortOfTotalSubdomains(self, listSubdomain = []):
+        subdomainPortsDict = {}
+
+        for subdomain in listSubdomain:
+            subdomainPortsDict[subdomain] = self.nmapOpenPortSubdomain(subdomain)
+        return subdomainPortsDict
+        
+    
+    # def threadAmass(self):
+    #     # thread 1: scan subdomain
+    #     scanSubdomainWithThread = self.scanSubdomain()
+    #     threadScanSubdomain = threading.Thread(target=scanSubdomainWithThread)
+    
+    #     # thread 2: pull subdomain to nmap
+    #     while(len(queueSubdomain) != 0):
+    #         nmapOpenPort = self.nmapOpenPortSubdomain(queueSubdomain[0])
+    #         queueSubdomain.pop(0)
+    #     threadNmapSubdomain = threading.Thread()
+
+
+class Aquatone:
+    def scanAquatone(self, subdomainPortsDict = {}):
+        for subdomain, openPort in subdomainPortsDict.items():
+            openPorts = ",".join(openPort)     
+            os.system(f"echo {subdomain} | aquatone -ports {openPorts} ") 
+            fileUrl = open("list_url.txt", "r+")
+            list_url = []
+            for url in fileUrl:
+                list_url.append(url)
+            fileUrl.close()
+            return list_url
+
+stepOne = Amass("fpt.vn")
+
+# getSubdomain = test.getSubdomain()
+
+# *** FOR TESTING *** #
+getSubdomain = [
+    "isp-mta1.fpt.vn",
+    "isp-mta4.fpt.vn",
+    "dns-b.fpt.vn",
+    "isp-dhcp.fpt.vn",
+    "dns5.fpt.vn",
+    "beta-cms.fpt.vn",
+    "sip.fpt.vn",
+    "tenmien.fpt.vn",
+    "isp-radius1.fpt.vn",
+    "isp-radius2.fpt.vn"
+]
+
+dictSubdomainAndOpenPort = stepOne.discoverOpenPortOfTotalSubdomains(getSubdomain)
+
+stepTwo = Aquatone()
+stepTwo.scanAquatone(dictSubdomainAndOpenPort)
